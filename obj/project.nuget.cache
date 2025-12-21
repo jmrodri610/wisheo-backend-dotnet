@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "va/Smujv5F4=",
+  "success": true,
+  "projectFilePath": "/Users/josemanuelrodriguezfernandez/wisheo/wisheo-backend-v2/wisheo-backend-v2.csproj",
+  "expectedPackageFiles": [
+    "/Users/josemanuelrodriguezfernandez/.nuget/packages/microsoft.aspnetcore.openapi/10.0.1/microsoft.aspnetcore.openapi.10.0.1.nupkg.sha512",
+    "/Users/josemanuelrodriguezfernandez/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
