@@ -3,6 +3,7 @@ namespace wisheo_backend_v2.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using wisheo_backend_v2.Services;
 using wisheo_backend_v2.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -27,5 +28,16 @@ public class UsersController : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginDto dto)
+    {
+        var response = await _userService.Login(dto);
+        
+        if (response == null)
+            return Unauthorized(new { message = "Usuario o contraseña incorrectos" });
+
+        return Ok(response);
     }
 }

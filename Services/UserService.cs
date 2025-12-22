@@ -5,13 +5,18 @@ using wisheo_backend_v2.DTOs;
 using wisheo_backend_v2.Data;
 using wisheo_backend_v2.Helpers;
 
+
 public class UserService
 {
     private readonly UserRepository _userRepository;
+    private readonly JwtHelper _jwtHelper;
+    private readonly AppDbContext _context;
 
-    public UserService(UserRepository userRepository)
+    public UserService(UserRepository userRepository, JwtHelper jwtHelper, AppDbContext context)
     {
         _userRepository = userRepository;
+        _jwtHelper = jwtHelper;
+        _context = context;
     }
 
     public async Task<User> RegisterUser(UserRegisterDto dto)
@@ -26,12 +31,34 @@ public class UserService
             Name = dto.Name,
             Surname = dto.Surname,
             Username = dto.Username,
-            Birthday = DateTime.SpecifyKind(dto.Birthday, DateTimeKind.Utc)
+            Birthday = DateTime.SpecifyKind(dto.Birthday, DateTimeKind.Utc),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
         };
-
-        user.PasswordHash = PasswordHasher.Hash(user, dto.Password);
 
         await _userRepository.Add(user);
         return user;
+    }
+
+    public async Task<AuthResponseDto?> Login(LoginDto dto)
+    {
+        var user = await _userRepository.GetByUsername(dto.Username);
+        
+        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+            return null;
+
+        var accessToken = _jwtHelper.GenerateAccessToken(user);
+        var refreshTokenValue = _jwtHelper.GenerateRefreshToken();
+
+        var refreshTokenEntity = new RefreshToken
+        {
+            Token = refreshTokenValue,
+            UserId = user.Id,
+            Expires = DateTime.UtcNow.AddDays(7)
+        };
+
+        _context.RefreshTokens.Add(refreshTokenEntity);
+        await _context.SaveChangesAsync();
+
+        return new AuthResponseDto(accessToken, refreshTokenValue, user.Username);
     }
 }
