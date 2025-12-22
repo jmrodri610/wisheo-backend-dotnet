@@ -42,4 +42,35 @@ public class WishlistsController(WishlistService wishlistService) : ControllerBa
 
         return Ok(new { message = "Deseo añadido", id = itemId });
     }
+
+    [HttpPatch("items/{itemId}/toggle-purchased")]
+    public async Task<IActionResult> TogglePurchased(int itemId)
+    {
+        var success = await _wishlistService.TogglePurchased(itemId);
+        if (!success) return NotFound("Ítem no encontrado");
+        return Ok(new { message = "Estado del ítem actualizado" });
+    }
+
+    [HttpDelete("items/{itemId}")]
+    public async Task<IActionResult> DeleteItem(int itemId)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var success = await _wishlistService.DeleteItem(itemId, userId);
+        
+        if (!success) return NotFound();
+        
+        return Ok(new { message = "Ítem eliminado correctamente" });
+    }
+
+    [HttpPut("items/{itemId}")]
+    public async Task<IActionResult> UpdateItem(int itemId, UpdateWishItemDto dto)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        
+        var success = await _wishlistService.UpdateItem(itemId, userId, dto);
+        
+        if (!success) return NotFound("Ítem no encontrado o no tienes permisos para editarlo");
+
+        return Ok(new { message = "Ítem actualizado correctamente" });
+    }
 }

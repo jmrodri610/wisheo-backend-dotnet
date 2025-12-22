@@ -17,3 +17,12 @@ public record WishItemResponseDto(
     decimal? Price, 
     bool IsPurchased
 );
+
+public record UpdateWishItemDto(
+    string? Name, 
+    string? Description, 
+    string? ProductUrl, 
+    string? ImageUrl, 
+    decimal? Price,
+    string? Currency
+);

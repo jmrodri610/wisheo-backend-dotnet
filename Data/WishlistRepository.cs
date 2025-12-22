@@ -33,4 +33,23 @@ public class WishlistRepository(AppDbContext context)
         _context.WishItems.Add(item);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<WishItem?> GetItemById(int itemId)
+    {
+        return await _context.WishItems
+            .Include(i => i.Wishlist)
+            .FirstOrDefaultAsync(i => i.Id == itemId);
+    }
+
+    public async Task UpdateItem(WishItem item)
+    {
+        _context.WishItems.Update(item);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteItem(WishItem item)
+    {
+        _context.WishItems.Remove(item);
+        await _context.SaveChangesAsync();
+    }
 }

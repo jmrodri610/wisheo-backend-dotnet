@@ -52,4 +52,41 @@ public class WishlistService(WishlistRepository repository)
         await _repository.AddWishItem(item);
         return item.Id;
     }
+
+    public async Task<bool> UpdateItem(int itemId, int userId, UpdateWishItemDto dto)
+    {
+        var item = await _repository.GetItemById(itemId);
+
+
+        if (item == null || item.Wishlist.UserId != userId) return false;
+
+        if (dto.Name != null) item.Name = dto.Name;
+        item.Description = dto.Description;
+        item.ProductUrl = dto.ProductUrl;
+        item.ImageUrl = dto.ImageUrl;
+        item.Price = dto.Price;
+        if (dto.Currency != null) item.Currency = dto.Currency;
+
+        await _repository.UpdateItem(item);
+        return true;
+    }
+
+    public async Task<bool> TogglePurchased(int itemId)
+    {
+        var item = await _repository.GetItemById(itemId);
+        if (item == null) return false;
+
+        item.IsPurchased = !item.IsPurchased;
+        await _repository.UpdateItem(item);
+        return true;
+    }
+
+    public async Task<bool> DeleteItem(int itemId, int userId)
+    {
+        var item = await _repository.GetItemById(itemId);
+        if (item == null || item.Wishlist.UserId != userId) return false;
+
+        await _repository.DeleteItem(item);
+        return true;
+    }
 }
