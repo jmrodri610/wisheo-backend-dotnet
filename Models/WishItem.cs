@@ -5,7 +5,7 @@ namespace wisheo_backend_v2.Models;
 
 public class WishItem
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
     [MaxLength(200)]
@@ -18,6 +18,6 @@ public class WishItem
     public string? Currency { get; set; } = "EUR";
     public bool IsPurchased { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public int WishlistId { get; set; }
+    public Guid WishlistId { get; set; }
     public Wishlist Wishlist { get; set; } = null!;
 }

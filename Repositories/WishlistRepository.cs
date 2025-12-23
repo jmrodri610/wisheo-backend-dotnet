@@ -13,7 +13,7 @@ public class WishlistRepository(AppDbContext context)
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<Wishlist>> GetWishlistsByUserId(int userId)
+    public async Task<List<Wishlist>> GetWishlistsByUserId(Guid userId)
     {
         return await _context.Wishlists
             .Include(w => w.Items)
@@ -21,7 +21,7 @@ public class WishlistRepository(AppDbContext context)
             .ToListAsync();
     }
 
-    public async Task<Wishlist?> GetByIdAndUserId(int wishlistId, int userId)
+    public async Task<Wishlist?> GetByIdAndUserId(Guid wishlistId, Guid userId)
     {
         return await _context.Wishlists
             .FirstOrDefaultAsync(w => w.Id == wishlistId && w.UserId == userId);
@@ -33,7 +33,7 @@ public class WishlistRepository(AppDbContext context)
         await _context.SaveChangesAsync();
     }
 
-    public async Task<WishItem?> GetItemById(int itemId)
+    public async Task<WishItem?> GetItemById(Guid itemId)
     {
         return await _context.WishItems
             .Include(i => i.Wishlist)

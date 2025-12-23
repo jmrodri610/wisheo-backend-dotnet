@@ -16,7 +16,7 @@ public class WishlistsController(WishlistService wishlistService) : ControllerBa
     [HttpPost]
     public async Task<IActionResult> Create(CreateWishlistDto dto)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var id = await _wishlistService.CreateWishlist(dto, userId);
         return Ok(new { message = "Lista creada", id });
     }
@@ -24,15 +24,15 @@ public class WishlistsController(WishlistService wishlistService) : ControllerBa
     [HttpGet]
     public async Task<ActionResult<IEnumerable<WishlistResponseDto>>> GetAll()
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var lists = await _wishlistService.GetUserWishlists(userId);
         return Ok(lists);
     }
 
     [HttpPost("{wishlistId}/items")]
-    public async Task<IActionResult> AddItem(int wishlistId, CreateWishItemDto dto)
+    public async Task<IActionResult> AddItem(Guid wishlistId, CreateWishItemDto dto)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var itemId = await _wishlistService.AddItemToWishlist(wishlistId, userId, dto);
 
         if (itemId == null) return NotFound("Lista no encontrada o no tienes acceso");
@@ -41,7 +41,7 @@ public class WishlistsController(WishlistService wishlistService) : ControllerBa
     }
 
     [HttpPatch("items/{itemId}/toggle-purchased")]
-    public async Task<IActionResult> TogglePurchased(int itemId)
+    public async Task<IActionResult> TogglePurchased(Guid itemId)
     {
         var success = await _wishlistService.TogglePurchased(itemId);
         if (!success) return NotFound("Ítem no encontrado");
@@ -49,9 +49,9 @@ public class WishlistsController(WishlistService wishlistService) : ControllerBa
     }
 
     [HttpDelete("items/{itemId}")]
-    public async Task<IActionResult> DeleteItem(int itemId)
+    public async Task<IActionResult> DeleteItem(Guid itemId)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var success = await _wishlistService.DeleteItem(itemId, userId);
         
         if (!success) return NotFound();
@@ -60,9 +60,9 @@ public class WishlistsController(WishlistService wishlistService) : ControllerBa
     }
 
     [HttpPut("items/{itemId}")]
-    public async Task<IActionResult> UpdateItem(int itemId, UpdateWishItemDto dto)
+    public async Task<IActionResult> UpdateItem(Guid itemId, UpdateWishItemDto dto)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         
         var success = await _wishlistService.UpdateItem(itemId, userId, dto);
         

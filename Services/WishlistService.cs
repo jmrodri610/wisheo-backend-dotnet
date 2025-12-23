@@ -8,7 +8,7 @@ public class WishlistService(WishlistRepository repository)
 {
     private readonly WishlistRepository _repository = repository;
 
-    public async Task<int> CreateWishlist(CreateWishlistDto dto, int userId)
+    public async Task<Guid> CreateWishlist(CreateWishlistDto dto, Guid userId)
     {
         var wishlist = new Wishlist
         {
@@ -22,7 +22,7 @@ public class WishlistService(WishlistRepository repository)
         return wishlist.Id;
     }
 
-    public async Task<List<WishlistResponseDto>> GetUserWishlists(int userId)
+    public async Task<List<WishlistResponseDto>> GetUserWishlists(Guid userId)
     {
         var lists = await _repository.GetWishlistsByUserId(userId);
 
@@ -34,7 +34,7 @@ public class WishlistService(WishlistRepository repository)
         ))];
     }
 
-    public async Task<int?> AddItemToWishlist(int wishlistId, int userId, CreateWishItemDto dto)
+    public async Task<Guid?> AddItemToWishlist(Guid wishlistId, Guid userId, CreateWishItemDto dto)
     {
         var wishlist = await _repository.GetByIdAndUserId(wishlistId, userId);
         if (wishlist == null) return null;
@@ -53,7 +53,7 @@ public class WishlistService(WishlistRepository repository)
         return item.Id;
     }
 
-    public async Task<bool> UpdateItem(int itemId, int userId, UpdateWishItemDto dto)
+    public async Task<bool> UpdateItem(Guid itemId, Guid userId, UpdateWishItemDto dto)
     {
         var item = await _repository.GetItemById(itemId);
 
@@ -71,7 +71,7 @@ public class WishlistService(WishlistRepository repository)
         return true;
     }
 
-    public async Task<bool> TogglePurchased(int itemId)
+    public async Task<bool> TogglePurchased(Guid itemId)
     {
         var item = await _repository.GetItemById(itemId);
         if (item == null) return false;
@@ -81,7 +81,7 @@ public class WishlistService(WishlistRepository repository)
         return true;
     }
 
-    public async Task<bool> DeleteItem(int itemId, int userId)
+    public async Task<bool> DeleteItem(Guid itemId, Guid userId)
     {
         var item = await _repository.GetItemById(itemId);
         if (item == null || item.Wishlist.UserId != userId) return false;
@@ -90,7 +90,7 @@ public class WishlistService(WishlistRepository repository)
         return true;
     }
 
-    public async Task<bool> AddFromFeed(int userId, AddFromFeedDto dto)
+    public async Task<bool> AddFromFeed(Guid userId, AddFromFeedDto dto)
 {
 
     var wishlist = await _repository.GetByIdAndUserId(dto.WishlistId, userId);

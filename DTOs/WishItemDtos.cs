@@ -9,7 +9,7 @@ public record CreateWishItemDto(
 );
 
 public record WishItemResponseDto(
-    int Id, 
+    Guid Id, 
     string Name, 
     string? Description, 
     string? ImageUrl, 
@@ -28,7 +28,7 @@ public record UpdateWishItemDto(
 );
 
 public record AddFromFeedDto(
-    int WishlistId,
+    Guid WishlistId,
     string Name,
     string? Description,
     string? ProductUrl,
