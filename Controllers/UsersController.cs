@@ -1,5 +1,4 @@
 namespace wisheo_backend_v2.Controllers;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using wisheo_backend_v2.Services;
 using wisheo_backend_v2.DTOs;
@@ -7,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController(UserService userService) : ControllerBase
+public class UsersController(UserService userService) : BaseController
 {
     private readonly UserService _userService = userService;
 
@@ -40,11 +39,8 @@ public class UsersController(UserService userService) : ControllerBase
     [HttpPatch("me")]
     public async Task<IActionResult> UpdateProfile(UpdateUserDto dto)
     {
-        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);  
-        if (userIdClaim == null) return Unauthorized();
 
-        var userId = Guid.Parse(userIdClaim.Value);
-        var success = await _userService.UpdateUser(userId, dto);
+        var success = await _userService.UpdateUser(UserId, dto);
 
         if (!success) return BadRequest();
 

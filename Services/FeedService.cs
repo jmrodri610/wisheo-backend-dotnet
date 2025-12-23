@@ -19,7 +19,7 @@ public class FeedService(FeedRepository repository)
         return feed.OrderByDescending(f => f.CreatedAt).ToList();
     }
 
-    public async Task<List<FeedItemDto>> GetFullFeed(int userId)
+    public async Task<List<FeedItemDto>> GetFullFeed()
     {
         return await GetAnonymousFeed(); 
     }

@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using wisheo_backend_v2.Services;
 
 namespace wisheo_backend_v2.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class FeedController(FeedService feedService) : ControllerBase
+public class FeedController(FeedService feedService) : BaseController
 {
     private readonly FeedService _feedService = feedService;
 
@@ -15,16 +14,13 @@ public class FeedController(FeedService feedService) : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetFeed()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
-        if (userIdClaim == null)
+        if (OptionalUserId == null)
         {
             var anonymousFeed = await _feedService.GetAnonymousFeed();
             return Ok(anonymousFeed);
         }
-        
-        var userId = int.Parse(userIdClaim.Value);
-        var personalizedFeed = await _feedService.GetFullFeed(userId);
+        var personalizedFeed = await _feedService.GetFullFeed();
         return Ok(personalizedFeed);
     }
 }
