@@ -61,4 +61,19 @@ public class UserService
 
         return new AuthResponseDto(accessToken, refreshTokenValue, user.Username);
     }
+
+    public async Task<bool> UpdateUser(Guid userId, UpdateUserDto dto)
+    {
+        var user = await _userRepository.GetUserById(userId);
+
+
+        if (user == null) return false;
+
+        if (dto.Name != null) user.Name = dto.Name;
+        if (dto.Surname != null) user.Surname = dto.Surname;
+        if (dto.Birthday != null) user.Birthday = (DateTime)dto.Birthday;
+
+        await _userRepository.UpdateUser(user);
+        return true;
+    }
 }

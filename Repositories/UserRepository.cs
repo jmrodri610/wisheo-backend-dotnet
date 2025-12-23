@@ -28,4 +28,15 @@ public class UserRepository
         return await _context.Users
             .FirstOrDefaultAsync(u => u.Username == username);
     }
+
+    public async Task<User?> GetUserById(Guid userId) 
+    {
+        return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId); 
+    }
+
+    public async Task UpdateUser(User user)
+    {
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
+    }
 }

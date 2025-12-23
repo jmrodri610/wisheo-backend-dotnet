@@ -1,19 +1,15 @@
 namespace wisheo_backend_v2.Controllers;
-
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using wisheo_backend_v2.Services;
 using wisheo_backend_v2.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController : ControllerBase
+public class UsersController(UserService userService) : ControllerBase
 {
-    private readonly UserService _userService;
-
-    public UsersController(UserService userService)
-    {
-        _userService = userService;
-    }
+    private readonly UserService _userService = userService;
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(UserRegisterDto dto)
@@ -38,5 +34,20 @@ public class UsersController : ControllerBase
             return Unauthorized(new { message = "Usuario o contraseña incorrectos" });
 
         return Ok(response);
+    }
+
+    [Authorize]
+    [HttpPatch("me")]
+    public async Task<IActionResult> UpdateProfile(UpdateUserDto dto)
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);  
+        if (userIdClaim == null) return Unauthorized();
+
+        var userId = Guid.Parse(userIdClaim.Value);
+        var success = await _userService.UpdateUser(userId, dto);
+
+        if (!success) return BadRequest();
+
+        return Ok(new { message = "Perfil actualizado correctamente" });
     }
 }
