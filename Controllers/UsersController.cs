@@ -3,7 +3,6 @@ namespace wisheo_backend_v2.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using wisheo_backend_v2.Services;
 using wisheo_backend_v2.DTOs;
-using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]

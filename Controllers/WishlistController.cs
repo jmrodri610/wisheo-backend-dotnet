@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using wisheo_backend_v2.Data;
 using wisheo_backend_v2.DTOs;
-using wisheo_backend_v2.Models;
 using wisheo_backend_v2.Services;
 
 namespace wisheo_backend_v2.Controllers;

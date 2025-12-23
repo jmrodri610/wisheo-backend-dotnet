@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using wisheo_backend_v2.Data;
 using wisheo_backend_v2.Models;
 
 namespace wisheo_backend_v2.Repositories;

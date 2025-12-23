@@ -1,4 +1,4 @@
-namespace wisheo_backend_v2.Data;
+namespace wisheo_backend_v2.Repositories;
 
 using wisheo_backend_v2.Models;
 using Microsoft.EntityFrameworkCore;

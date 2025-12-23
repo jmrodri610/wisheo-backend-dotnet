@@ -2,7 +2,7 @@ namespace wisheo_backend_v2.Services;
 
 using wisheo_backend_v2.Models;
 using wisheo_backend_v2.DTOs;
-using wisheo_backend_v2.Data;
+using wisheo_backend_v2.Repositories;
 using wisheo_backend_v2.Helpers;
 
 

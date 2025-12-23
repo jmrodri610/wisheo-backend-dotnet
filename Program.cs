@@ -2,7 +2,6 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using wisheo_backend_v2.Data;
 using wisheo_backend_v2.Helpers;
 using wisheo_backend_v2.Repositories;
 using wisheo_backend_v2.Services;
