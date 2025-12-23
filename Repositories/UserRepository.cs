@@ -3,14 +3,9 @@ namespace wisheo_backend_v2.Repositories;
 using wisheo_backend_v2.Models;
 using Microsoft.EntityFrameworkCore;
 
-public class UserRepository
+public class UserRepository(AppDbContext context)
 {
-    private readonly AppDbContext _context;
-
-    public UserRepository(AppDbContext context)
-    {
-        _context = context;
-    }
+    private readonly AppDbContext _context = context;
 
     public async Task<bool> Exists(string username)
     {

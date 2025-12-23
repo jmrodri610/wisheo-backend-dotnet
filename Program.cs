@@ -18,6 +18,8 @@ builder.Services.AddScoped<WishlistRepository>();
 builder.Services.AddScoped<WishlistService>();
 builder.Services.AddScoped<FeedRepository>();
 builder.Services.AddScoped<FeedService>();
+builder.Services.AddScoped<SocialRepository>();
+builder.Services.AddScoped<SocialService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

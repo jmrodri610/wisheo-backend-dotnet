@@ -20,4 +20,6 @@ public class User
     public string PasswordHash { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<Wishlist> Wishlists { get; set; } = [];
+    public ICollection<Follow> Followers { get; set; } = [];
+    public ICollection<Follow> Following { get; set; } = [];
 }
