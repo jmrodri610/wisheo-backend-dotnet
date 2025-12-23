@@ -89,4 +89,25 @@ public class WishlistService(WishlistRepository repository)
         await _repository.DeleteItem(item);
         return true;
     }
+
+    public async Task<bool> AddFromFeed(int userId, AddFromFeedDto dto)
+{
+
+    var wishlist = await _repository.GetByIdAndUserId(dto.WishlistId, userId);
+    if (wishlist == null) return false;
+
+    var newItem = new WishItem
+    {
+        Name = dto.Name,
+        Description = dto.Description,
+        ProductUrl = dto.ProductUrl,
+        ImageUrl = dto.ImageUrl,
+        Price = dto.Price,
+        WishlistId = dto.WishlistId,
+        CreatedAt = DateTime.UtcNow
+    };
+
+    await _repository.AddWishItem(newItem);
+    return true;
+}
 }

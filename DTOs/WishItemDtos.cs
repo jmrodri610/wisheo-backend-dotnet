@@ -26,3 +26,12 @@ public record UpdateWishItemDto(
     decimal? Price,
     string? Currency
 );
+
+public record AddFromFeedDto(
+    int WishlistId,
+    string Name,
+    string? Description,
+    string? ProductUrl,
+    string? ImageUrl,
+    decimal? Price
+);
