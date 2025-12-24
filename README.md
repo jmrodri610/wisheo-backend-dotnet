@@ -88,42 +88,45 @@ sequenceDiagram
 
 📡 Endpoints Principales
 
-Social (Seguidores)
+```
+POST /api/social/follow/{id}
 
-POST /api/social/follow/{id}: Seguir a un usuario.
+DELETE /api/social/unfollow/{id}
 
-DELETE /api/social/unfollow/{id}: Dejar de seguir.
+GET /api/social/followers
 
-GET /api/social/followers: Lista de quiénes me siguen (incluye count).
+GET /api/social/following
 
-GET /api/social/following: Lista de a quiénes sigo (incluye count).
+POST /api/wishlists
 
-Wishlists
-POST /api/wishlists: Crear una nueva lista.
+GET /api/wishlists
 
-GET /api/wishlists: Obtener mis listas.
+POST /api/wishlists/{id}/items
 
-POST /api/wishlists/{id}/items: Añadir un ítem a una lista.
+PATCH /api/wishlists/items/{id}/toggle-purchased
 
-PATCH /api/wishlists/items/{id}/toggle-purchased: Marcar/desmarcar como comprado.
+PUT /api/wishlists/items/{id}
 
-PUT /api/wishlists/items/{id}: Editar detalle de un ítem.
+DELETE /api/wishlists/items/{id}
 
-DELETE /api/wishlists/items/{id}: Eliminar un ítem.
+```
 
 🚀 Instalación y Ejecución
+
 Levantar Base de Datos:
 
-Bash
-
+```
 docker-compose up -d
+```
+
 Aplicar Migraciones:
 
-Bash
-
+```
 dotnet ef database update
+```
+
 Ejecutar App:
 
-Bash
-
+```
 dotnet run
+```
