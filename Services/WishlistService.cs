@@ -22,6 +22,28 @@ public class WishlistService(WishlistRepository repository)
         return wishlist.Id;
     }
 
+    public async Task<bool> UpdateWishlist(Guid wishlistId, Guid userId, CreateWishlistDto dto)
+    {
+        var wishlist = await _repository.GetWishlistById(wishlistId);
+        
+        if (wishlist == null || wishlist.UserId != userId) return false;
+
+        wishlist.Title = dto.Title;
+
+        await _repository.UpdateWishlist(wishlist);
+        return true;
+    }
+
+    public async Task<bool> DeleteWishlist(Guid wishlistId, Guid userId)
+    {
+        var wishlist = await _repository.GetWishlistById(wishlistId);
+
+        if (wishlist == null || wishlist.UserId != userId) return false;
+
+        await _repository.DeleteWishlist(wishlist);
+        return true;
+    }
+
     public async Task<List<WishlistResponseDto>> GetUserWishlists(Guid userId)
     {
         var lists = await _repository.GetWishlistsByUserId(userId);

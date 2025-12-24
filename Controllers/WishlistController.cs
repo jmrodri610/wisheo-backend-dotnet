@@ -19,6 +19,26 @@ public class WishlistsController(WishlistService wishlistService) : BaseControll
         return Ok(new { message = "Lista creada", id });
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, CreateWishlistDto dto)
+    {
+        var success = await _wishlistService.UpdateWishlist(id, UserId, dto);
+        
+        if (!success) return NotFound("Lista no encontrada o no tienes permiso");
+        
+        return Ok(new { message = "Lista actualizada correctamente" });
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var success = await _wishlistService.DeleteWishlist(id, UserId);
+        
+        if (!success) return NotFound("Lista no encontrada o no tienes permiso");
+        
+        return Ok(new { message = "Lista eliminada correctamente" });
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<WishlistResponseDto>>> GetAll()
     {

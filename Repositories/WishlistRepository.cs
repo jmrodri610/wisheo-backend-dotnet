@@ -12,6 +12,22 @@ public class WishlistRepository(AppDbContext context)
         _context.Wishlists.Add(wishlist);
         await _context.SaveChangesAsync();
     }
+    public async Task UpdateWishlist(Wishlist wishlist)
+    {
+        _context.Wishlists.Update(wishlist);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<Wishlist?> GetWishlistById(Guid id)
+{
+    return await _context.Wishlists.FindAsync(id);
+}
+
+    public async Task DeleteWishlist(Wishlist wishlist)
+    {
+        _context.Wishlists.Remove(wishlist);
+        await _context.SaveChangesAsync();
+    }
 
     public async Task<List<Wishlist>> GetWishlistsByUserId(Guid userId)
     {
