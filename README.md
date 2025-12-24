@@ -20,33 +20,45 @@ Diagrama de Clases (UML)
 classDiagram
     class User {
         +Guid Id
-        +string Name
+        +string Username
         +string Email
-        +ICollection~Follow~ Followers
-        +ICollection~Follow~ Following
-        +ICollection~Wishlist~ Wishlists
     }
     class Wishlist {
         +Guid Id
         +string Title
         +Guid UserId
-        +ICollection~WishItem~ Items
     }
     class WishItem {
         +Guid Id
         +string Name
-        +bool IsPurchased
+        +string? Description
+        +decimal? Price
+        +DateTime CreatedAt
+    }
+    class Post {
+        +Guid Id
+        +string Content
+        +DateTime CreatedAt
+        +Guid UserId
+    }
+    class Comment {
+        +Guid Id
+        +string Text
+        +DateTime CreatedAt
+        +Guid PostId
+        +Guid UserId
     }
     class Follow {
         +Guid FollowerId
         +Guid FollowedId
-        +DateTime CreatedAt
     }
 
     User "1" -- "*" Wishlist : owns
     Wishlist "1" -- "*" WishItem : contains
+    User "1" -- "*" Post : writes
+    Post "1" -- "*" Comment : has
+    User "1" -- "*" Comment : writes
     User "1" -- "*" Follow : follows
-    Follow "*" -- "1" User : is followed by
 ```
 
 🛠 Stack Tecnológico
@@ -84,6 +96,50 @@ sequenceDiagram
     Repository-->>Service: Entity
     Service-->>BaseController: DTO
     BaseController-->>Client: 200 OK / Response
+```
+
+Diagrama de Secuencia: Feed
+
+```mermaid
+graph TD
+    A[Inicio: GetFeed] --> B{¿Usuario Logueado?}
+    B -- No --> C[AnonymousFeed]
+    B -- Sí --> D[FullFeed]
+
+    subgraph Fuentes de Datos
+        E[FeedRepository: Actividad Global]
+        F[Hardcoded: Sugerencias]
+        G[PostRepository: Posts de Seguidos]
+    end
+
+    C --> E
+    C --> F
+
+    D --> E
+    D --> F
+    D --> G
+
+    E & F & G --> H[Empaquetar en FeedItemDto polimórfico]
+    H --> I[Ordenar por CreatedAt DESC]
+    I --> J[Fin: Enviar Lista al Cliente]
+```
+
+Diagrama de flujo de notificaciones (SignalR)
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario A (Autor)
+    participant C as PostsController
+    participant S as SocialService
+    participant H as SocialHub (SignalR)
+    participant F as Usuario B (Seguidor)
+
+    U->>C: POST api/posts (Contenido)
+    C->>C: Guardar Post en DB
+    C->>S: Obtener lista de Seguidores
+    S-->>C: [List de IDs]
+    C->>H: Enviar "ReceiveNewPost" a IDs
+    H-->>F: Push Notificación (Nuevo Post)
 ```
 
 📡 Endpoints Principales
