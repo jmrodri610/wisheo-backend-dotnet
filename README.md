@@ -1,4 +1,5 @@
 Wisheo Backend 🚀
+
 Wisheo es una plataforma social para gestionar listas de deseos (wishlists) y conectar con amigos. Este backend está construido con una arquitectura robusta en capas, enfocada en la escalabilidad y la seguridad.
 
 🏗 Arquitectura del Sistema
