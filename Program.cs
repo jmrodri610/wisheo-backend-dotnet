@@ -20,6 +20,8 @@ builder.Services.AddScoped<FeedRepository>();
 builder.Services.AddScoped<FeedService>();
 builder.Services.AddScoped<SocialRepository>();
 builder.Services.AddScoped<SocialService>();
+builder.Services.AddScoped<PostRepository>();
+builder.Services.AddScoped<PostService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
