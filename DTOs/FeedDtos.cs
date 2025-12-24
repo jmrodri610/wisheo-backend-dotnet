@@ -1,14 +1,10 @@
 namespace wisheo_backend_v2.DTOs;
 
-public enum FeedItemType { Suggestion, UserPost }
+public enum FeedItemType { UserPost, WishItemActivity, Suggestion }
 
-public record FeedItemDto(
-    FeedItemType Type,
-    string Title,
-    string? Description,
-    string? ImageUrl,
-    string? ProductUrl,
-    decimal? Price,
-    string? Username,
-    DateTime CreatedAt
-);
+public class FeedItemDto(FeedItemType type, DateTime createdAt, object data)
+{
+    public FeedItemType Type { get; set; } = type;
+    public DateTime CreatedAt { get; set; } = createdAt;
+    public object Data { get; set; } = data;
+}

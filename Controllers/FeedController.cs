@@ -20,7 +20,8 @@ public class FeedController(FeedService feedService) : BaseController
             var anonymousFeed = await _feedService.GetAnonymousFeed();
             return Ok(anonymousFeed);
         }
-        var personalizedFeed = await _feedService.GetFullFeed();
+        
+        var personalizedFeed = await _feedService.GetFullFeed(OptionalUserId.Value);
         return Ok(personalizedFeed);
     }
 }

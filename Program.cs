@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using wisheo_backend_v2.Helpers;
+using wisheo_backend_v2.Hubs;
 using wisheo_backend_v2.Repositories;
 using wisheo_backend_v2.Services;
 
@@ -23,6 +24,7 @@ builder.Services.AddScoped<SocialService>();
 builder.Services.AddScoped<PostRepository>();
 builder.Services.AddScoped<PostService>();
 
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -47,6 +49,20 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
         ClockSkew = TimeSpan.Zero
     };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddAuthorization();
@@ -55,6 +71,7 @@ var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization(); 
+app.MapHub<SocialHub>("/hubs/social");
 
 app.MapControllers();
 app.Run();
