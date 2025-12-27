@@ -9,6 +9,17 @@ using wisheo_backend_v2.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -23,6 +34,7 @@ builder.Services.AddScoped<SocialRepository>();
 builder.Services.AddScoped<SocialService>();
 builder.Services.AddScoped<PostRepository>();
 builder.Services.AddScoped<PostService>();
+builder.Services.AddScoped<ProfileService>();
 
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
@@ -68,6 +80,9 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.UseRouting();
+app.UseCors("AllowLocalhost");
 
 app.UseAuthentication();
 app.UseAuthorization(); 
