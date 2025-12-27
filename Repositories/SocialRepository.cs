@@ -38,5 +38,11 @@ namespace wisheo_backend_v2.Repositories
                 .Select(f => f.Followed)
                 .ToListAsync();
         }
+
+        public async Task<bool> IsFollowing(Guid followerId, Guid followedId)
+        {
+            return await _context.Follows
+                .AnyAsync(f => f.FollowerId == followerId && f.FollowedId == followedId);
+        }
     }
 }

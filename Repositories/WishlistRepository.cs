@@ -67,4 +67,12 @@ public class WishlistRepository(AppDbContext context)
         _context.WishItems.Remove(item);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<Wishlist>> GetWishlistsByUser(Guid userId)
+    {
+        return await _context.Wishlists
+            .Include(w => w.Items)
+            .Where(w => w.UserId == userId)
+            .ToListAsync();
+    }
 }

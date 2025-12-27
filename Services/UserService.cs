@@ -62,6 +62,13 @@ public class UserService
         return new AuthResponseDto(accessToken, refreshTokenValue, user.Username);
     }
 
+    public async Task<User?> GetUserByUsername(string username)
+    {
+       var user = await _userRepository.GetByUsername(username);
+
+       return user;
+    }
+
     public async Task<bool> UpdateUser(Guid userId, UpdateUserDto dto)
     {
         var user = await _userRepository.GetUserById(userId);
