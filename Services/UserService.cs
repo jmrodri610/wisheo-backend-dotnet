@@ -4,7 +4,7 @@ using wisheo_backend_v2.Models;
 using wisheo_backend_v2.DTOs;
 using wisheo_backend_v2.Repositories;
 using wisheo_backend_v2.Helpers;
-
+using Microsoft.EntityFrameworkCore;
 
 public class UserService
 {
@@ -82,5 +82,40 @@ public class UserService
 
         await _userRepository.UpdateUser(user);
         return true;
+    }
+
+    public async Task<AuthResponseDto?> RefreshSessionAsync(string token)
+    {
+        var storedToken = await _context.RefreshTokens
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Token == token);
+
+        if (storedToken == null || storedToken.Expires < DateTime.UtcNow || storedToken.IsRevoked)
+        {
+            return null;
+        }
+
+        var newAccessToken = _jwtHelper.GenerateAccessToken(storedToken.User);
+    
+        var newRefreshTokenString = _jwtHelper.GenerateRefreshToken();
+        storedToken.IsRevoked = true;
+
+        var newTokenEntity = new RefreshToken
+        {
+            Token = newRefreshTokenString,
+            Expires = DateTime.UtcNow.AddDays(7),
+            UserId = storedToken.UserId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.RefreshTokens.Add(newTokenEntity);
+        await _context.SaveChangesAsync();
+
+        return new AuthResponseDto
+        (
+            newAccessToken,
+            newRefreshTokenString,
+            storedToken.User.Username
+        );
     }
 }

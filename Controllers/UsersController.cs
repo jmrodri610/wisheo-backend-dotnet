@@ -46,4 +46,22 @@ public class UsersController(UserService userService) : BaseController
 
         return Ok(new { message = "Perfil actualizado correctamente" });
     }
+
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh([FromBody] TokenRequestDto request)
+    {
+        if (string.IsNullOrEmpty(request.RefreshToken))
+        {
+            return BadRequest("El Refresh Token es obligatorio.");
+        }
+
+        var result = await _userService.RefreshSessionAsync(request.RefreshToken);
+
+        if (result == null)
+        {
+            return Unauthorized(new { message = "Sesión inválida o expirada. Inicie sesión nuevamente." });
+        }
+
+        return Ok(result);
+    }
 }
