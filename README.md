@@ -1,31 +1,48 @@
-Wisheo Backend 🚀
+# Wisheo Backend
 
-Wisheo es una plataforma social para gestionar listas de deseos (wishlists) y conectar con amigos. Este backend está construido con una arquitectura robusta en capas, enfocada en la escalabilidad y la seguridad.
+Wisheo es una plataforma social para gestionar listas de deseos y conectar con amigos. Este backend está construido con .NET 9 siguiendo una arquitectura en capas, con soporte para autenticación propia y SSO mediante Firebase.
 
-🏗 Arquitectura del Sistema
+## Stack tecnológico
 
-El proyecto sigue el patrón de Arquitectura en Capas:
+- **Framework:** .NET 9 / ASP.NET Core
+- **Base de datos:** PostgreSQL
+- **ORM:** Entity Framework Core (Code First)
+- **Autenticación:** JWT + Firebase Admin SDK (Google/Apple SSO)
+- **Real-time:** SignalR
+- **Infraestructura:** Docker & Docker Compose
 
-Controllers: Gestión de endpoints y validación de entrada.
+## Arquitectura
 
-Services: Lógica de negocio y reglas de aplicación.
+El proyecto sigue el patrón de arquitectura en capas:
 
-Repositories: Abstracción de la persistencia de datos (Entity Framework).
+```
+Controllers  →  Services  →  Repositories  →  Database
+```
 
-Models/Entities: Definición de los datos y sus relaciones.
+- **Controllers** — endpoints REST y validación de entrada
+- **Services** — lógica de negocio
+- **Repositories** — abstracción de persistencia con Entity Framework
+- **Models / DTOs** — entidades y objetos de transferencia
 
-Diagrama de Clases (UML)
+### Diagrama de clases
 
 ```mermaid
 classDiagram
     class User {
         +Guid Id
+        +string Name
+        +string Surname
         +string Username
         +string Email
+        +string? FirebaseUid
+        +DateTime Birthday
     }
     class Wishlist {
         +Guid Id
         +string Title
+        +string? Description
+        +string? Emoji
+        +bool IsPublic
         +Guid UserId
     }
     class WishItem {
@@ -33,7 +50,8 @@ classDiagram
         +string Name
         +string? Description
         +decimal? Price
-        +DateTime CreatedAt
+        +string? ImageUrl
+        +bool IsPurchased
     }
     class Post {
         +Guid Id
@@ -44,7 +62,6 @@ classDiagram
     class Comment {
         +Guid Id
         +string Text
-        +DateTime CreatedAt
         +Guid PostId
         +Guid UserId
     }
@@ -61,128 +78,112 @@ classDiagram
     User "1" -- "*" Follow : follows
 ```
 
-🛠 Stack Tecnológico
-
-Framework: .NET 9
-
-Base de Datos: PostgreSQL
-
-ORM: Entity Framework Core (Code First)
-
-Infraestructura: Docker & Docker Compose
-
-Seguridad: JWT (JSON Web Tokens)
-
-🔒 Seguridad y Contexto de Usuario
-
-Hemos implementado un BaseController personalizado que intercepta el token JWT y expone el UserId de forma segura a todos los controladores protegidos.
-
-Diagrama de Secuencia: Flujo de Petición
+### Flujo de autenticación
 
 ```mermaid
 sequenceDiagram
-    participant Client
-    participant BaseController
-    participant Service
-    participant Repository
-    participant Database
+    participant App
+    participant Backend
+    participant Firebase
 
-    Client->>BaseController: Request + JWT
-    Note over BaseController: Extrae UserId de HttpContext
-    BaseController->>Service: Lógica(UserId, data)
-    Service->>Repository: Query(UserId)
-    Repository->>Database: SQL
-    Database-->>Repository: Result
-    Repository-->>Service: Entity
-    Service-->>BaseController: DTO
-    BaseController-->>Client: 200 OK / Response
+    Note over App,Backend: Credenciales propias
+    App->>Backend: POST /api/users/login (username, password)
+    Backend-->>App: JWT + Refresh Token
+
+    Note over App,Backend: SSO (Google / Apple)
+    App->>Firebase: signInWithPopup / authenticate
+    Firebase-->>App: Firebase ID Token
+    App->>Backend: POST /api/users/firebase-login (idToken)
+    Backend->>Firebase: VerifyIdTokenAsync
+    Firebase-->>Backend: Token válido
+    Backend-->>App: JWT + Refresh Token
 ```
 
-Diagrama de Secuencia: Feed
+## Endpoints principales
 
-```mermaid
-graph TD
-    A[Inicio: GetFeed] --> B{¿Usuario Logueado?}
-    B -- No --> C[AnonymousFeed]
-    B -- Sí --> D[FullFeed]
+### Autenticación
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/api/users/register` | Registro con credenciales |
+| POST | `/api/users/login` | Login con username y contraseña |
+| POST | `/api/users/firebase-login` | Login / registro con Firebase SSO |
+| POST | `/api/users/refresh` | Renovar access token |
+| PATCH | `/api/users/me` | Actualizar perfil |
 
-    subgraph Fuentes de Datos
-        E[FeedRepository: Actividad Global]
-        F[Hardcoded: Sugerencias]
-        G[PostRepository: Posts de Seguidos]
-    end
+### Wishlists
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/api/wishlists` | Obtener wishlists del usuario |
+| POST | `/api/wishlists` | Crear wishlist |
+| PUT | `/api/wishlists/{id}` | Editar wishlist |
+| DELETE | `/api/wishlists/{id}` | Eliminar wishlist |
+| POST | `/api/wishlists/{id}/items` | Añadir item |
+| PUT | `/api/wishlists/items/{id}` | Editar item |
+| DELETE | `/api/wishlists/items/{id}` | Eliminar item |
+| PATCH | `/api/wishlists/items/{id}/toggle-purchased` | Marcar/desmarcar como reservado |
 
-    C --> E
-    C --> F
+### Social
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/api/social/follow/{id}` | Seguir usuario |
+| DELETE | `/api/social/unfollow/{id}` | Dejar de seguir |
+| GET | `/api/social/followers` | Mis seguidores |
+| GET | `/api/social/following` | A quién sigo |
 
-    D --> E
-    D --> F
-    D --> G
+### Feed y posts
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/api/feed` | Feed personalizado |
+| POST | `/api/posts` | Crear post |
+| POST | `/api/posts/{id}/comments` | Comentar en un post |
 
-    E & F & G --> H[Empaquetar en FeedItemDto polimórfico]
-    H --> I[Ordenar por CreatedAt DESC]
-    I --> J[Fin: Enviar Lista al Cliente]
-```
+## Instalación y ejecución
 
-Diagrama de flujo de notificaciones (SignalR)
+### Requisitos
+- .NET 9 SDK
+- PostgreSQL (o Docker)
+- `dotnet-ef` tool
 
-```mermaid
-sequenceDiagram
-    participant U as Usuario A (Autor)
-    participant C as PostsController
-    participant S as SocialService
-    participant H as SocialHub (SignalR)
-    participant F as Usuario B (Seguidor)
+### 1. Levantar la base de datos
 
-    U->>C: POST api/posts (Contenido)
-    C->>C: Guardar Post en DB
-    C->>S: Obtener lista de Seguidores
-    S-->>C: [List de IDs]
-    C->>H: Enviar "ReceiveNewPost" a IDs
-    H-->>F: Push Notificación (Nuevo Post)
-```
-
-📡 Endpoints Principales
-
-```
-POST /api/social/follow/{id}
-
-DELETE /api/social/unfollow/{id}
-
-GET /api/social/followers
-
-GET /api/social/following
-
-POST /api/wishlists
-
-GET /api/wishlists
-
-POST /api/wishlists/{id}/items
-
-PATCH /api/wishlists/items/{id}/toggle-purchased
-
-PUT /api/wishlists/items/{id}
-
-DELETE /api/wishlists/items/{id}
-
-```
-
-🚀 Instalación y Ejecución
-
-Levantar Base de Datos:
-
-```
+```bash
 docker-compose up -d
 ```
 
-Aplicar Migraciones:
+### 2. Configurar secrets locales
+
+```bash
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5433;Database=wisheo_db;Username=postgres;Password=TU_PASSWORD"
+dotnet user-secrets set "JwtSettings:Secret" "tu_clave_secreta"
+dotnet user-secrets set "JwtSettings:Issuer" "wisheo-api"
+dotnet user-secrets set "JwtSettings:Audience" "wisheo-app"
+```
+
+### 3. Configurar Firebase (SSO)
+
+Descarga la clave de cuenta de servicio desde Firebase Console → Configuración del proyecto → Cuentas de servicio → Generar nueva clave privada, y guárdala como:
 
 ```
-dotnet ef database update
+firebase-service-account.json  ← en la raíz del proyecto (excluido de git)
 ```
 
-Ejecutar App:
+### 4. Aplicar migraciones
 
+```bash
+dotnet ef database update --connection "Host=localhost;Port=5433;Database=wisheo_db;Username=postgres;Password=TU_PASSWORD"
 ```
+
+### 5. Ejecutar
+
+```bash
 dotnet run
 ```
+
+La API estará disponible en `http://localhost:5000`.
+
+## Seguridad
+
+- Las contraseñas se almacenan hasheadas con BCrypt.
+- El `firebase-service-account.json` está excluido de git via `.gitignore`.
+- Los secrets de configuración se gestionan con `dotnet user-secrets` en local y variables de entorno en producción.
+- Todos los endpoints protegidos requieren JWT via header `Authorization: Bearer <token>`.
