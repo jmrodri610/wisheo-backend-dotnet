@@ -47,6 +47,15 @@ public class UsersController(UserService userService) : BaseController
         return Ok(new { message = "Perfil actualizado correctamente" });
     }
 
+    [HttpPost("firebase-login")]
+    public async Task<IActionResult> FirebaseLogin([FromBody] FirebaseLoginDto dto)
+    {
+        var response = await _userService.FirebaseLogin(dto.IdToken);
+        if (response == null)
+            return Unauthorized(new { message = "Firebase token inválido." });
+        return Ok(response);
+    }
+
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh([FromBody] TokenRequestDto request)
     {

@@ -12,6 +12,21 @@ public class UserRepository(AppDbContext context)
         return await _context.Users.AnyAsync(u => u.Username == username);
     }
 
+    public async Task<bool> ExistsByEmail(string email)
+    {
+        return await _context.Users.AnyAsync(u => u.Email == email);
+    }
+
+    public async Task<User?> GetByEmail(string email)
+    {
+        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+    }
+
+    public async Task<User?> GetByFirebaseUid(string firebaseUid)
+    {
+        return await _context.Users.FirstOrDefaultAsync(u => u.FirebaseUid == firebaseUid);
+    }
+
     public async Task Add(User user)
     {
         _context.Users.Add(user);

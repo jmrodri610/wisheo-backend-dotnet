@@ -10,6 +10,8 @@ public class Wishlist
     public string Title { get; set; } = string.Empty;
     [MaxLength(500)]
     public string? Description { get; set; }
+    [MaxLength(10)]
+    public string? Emoji { get; set; }
     public bool IsPublic { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Guid UserId { get; set; }

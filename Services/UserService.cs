@@ -5,6 +5,7 @@ using wisheo_backend_v2.DTOs;
 using wisheo_backend_v2.Repositories;
 using wisheo_backend_v2.Helpers;
 using Microsoft.EntityFrameworkCore;
+using FirebaseAdmin.Auth;
 
 public class UserService
 {
@@ -22,21 +23,79 @@ public class UserService
     public async Task<User> RegisterUser(UserRegisterDto dto)
     {
         if (await _userRepository.Exists(dto.Username))
-        {
-            throw new Exception("El usuario ya existe.");
-        }
+            throw new Exception("Username already taken.");
+
+        if (await _userRepository.ExistsByEmail(dto.Email))
+            throw new Exception("Email is already registered.");
 
         var user = new User
         {
             Name = dto.Name,
             Surname = dto.Surname,
             Username = dto.Username,
+            Email = dto.Email,
             Birthday = DateTime.SpecifyKind(dto.Birthday, DateTimeKind.Utc),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
         };
 
         await _userRepository.Add(user);
         return user;
+    }
+
+    public async Task<AuthResponseDto?> FirebaseLogin(string idToken)
+    {
+        FirebaseToken decoded;
+        try
+        {
+            decoded = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
+        }
+        catch
+        {
+            return null;
+        }
+
+        var firebaseUid = decoded.Uid;
+        var email = decoded.Claims.TryGetValue("email", out var e) ? e?.ToString() : null;
+        var name = decoded.Claims.TryGetValue("name", out var n) ? n?.ToString() ?? "" : "";
+
+        var user = await _userRepository.GetByFirebaseUid(firebaseUid);
+
+        if (user == null && email != null)
+            user = await _userRepository.GetByEmail(email);
+
+        if (user == null)
+        {
+            var nameParts = (name ?? "").Split(' ', 2);
+            user = new User
+            {
+                Name = nameParts.Length > 0 ? nameParts[0] : "User",
+                Surname = nameParts.Length > 1 ? nameParts[1] : "",
+                Username = email?.Split('@')[0] ?? firebaseUid[..8],
+                Email = email,
+                FirebaseUid = firebaseUid,
+                Birthday = DateTime.UtcNow,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString())
+            };
+            await _userRepository.Add(user);
+        }
+        else if (user.FirebaseUid == null)
+        {
+            user.FirebaseUid = firebaseUid;
+            await _userRepository.UpdateUser(user);
+        }
+
+        var accessToken = _jwtHelper.GenerateAccessToken(user);
+        var refreshTokenValue = _jwtHelper.GenerateRefreshToken();
+
+        _context.RefreshTokens.Add(new RefreshToken
+        {
+            Token = refreshTokenValue,
+            UserId = user.Id,
+            Expires = DateTime.UtcNow.AddDays(7)
+        });
+        await _context.SaveChangesAsync();
+
+        return new AuthResponseDto(accessToken, refreshTokenValue, user.Username);
     }
 
     public async Task<AuthResponseDto?> Login(LoginDto dto)

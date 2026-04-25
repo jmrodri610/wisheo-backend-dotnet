@@ -1,4 +1,6 @@
 using System.Text;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -8,6 +10,30 @@ using wisheo_backend_v2.Repositories;
 using wisheo_backend_v2.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+try
+{
+    GoogleCredential credential;
+    var serviceAccountPath = Path.Combine(Directory.GetCurrentDirectory(), "firebase-service-account.json");
+
+    if (File.Exists(serviceAccountPath))
+    {
+        using var stream = File.OpenRead(serviceAccountPath);
+        credential = GoogleCredential.FromStream(stream);
+        Console.WriteLine("[Firebase] Initialized with service account file.");
+    }
+    else
+    {
+        credential = GoogleCredential.GetApplicationDefault();
+        Console.WriteLine("[Firebase] Initialized with Application Default Credentials.");
+    }
+
+    FirebaseApp.Create(new AppOptions { Credential = credential });
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[Firebase] Could not initialize: {ex.Message}. SSO will not work.");
+}
 
 builder.Services.AddCors(options =>
 {

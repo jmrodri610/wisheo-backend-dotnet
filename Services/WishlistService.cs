@@ -14,6 +14,7 @@ public class WishlistService(WishlistRepository repository)
         {
             Title = dto.Title,
             Description = dto.Description,
+            Emoji = dto.Emoji,
             IsPublic = dto.IsPublic,
             UserId = userId
         };
@@ -29,6 +30,9 @@ public class WishlistService(WishlistRepository repository)
         if (wishlist == null || wishlist.UserId != userId) return false;
 
         wishlist.Title = dto.Title;
+        wishlist.Description = dto.Description;
+        wishlist.Emoji = dto.Emoji;
+        wishlist.IsPublic = dto.IsPublic;
 
         await _repository.UpdateWishlist(wishlist);
         return true;
@@ -49,7 +53,7 @@ public class WishlistService(WishlistRepository repository)
         var lists = await _repository.GetWishlistsByUserId(userId);
 
         return [.. lists.Select(w => new WishlistResponseDto(
-            w.Id, w.Title, w.Description, w.IsPublic,
+            w.Id, w.Title, w.Description, w.Emoji, w.IsPublic,
             [.. w.Items.Select(i => new WishItemResponseDto(
                 i.Id, i.Name, i.Description, i.ImageUrl, i.ProductUrl, i.Price, i.IsPurchased
             ))]

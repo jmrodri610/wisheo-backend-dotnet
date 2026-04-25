@@ -54,3 +54,5 @@ TestResult.xml
 nunit-*.xml
 
 .env
+firebase-service-account.json
+*service-account*.json
