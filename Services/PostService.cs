@@ -4,9 +4,14 @@ using wisheo_backend_v2.DTOs;
 
 namespace wisheo_backend_v2.Services;
 
-public class PostService(PostRepository postRepository)
+public class PostService(
+    PostRepository postRepository,
+    UserRepository userRepository,
+    NotificationService notificationService)
 {
     private readonly PostRepository _postRepository = postRepository;
+    private readonly UserRepository _userRepository = userRepository;
+    private readonly NotificationService _notificationService = notificationService;
 
     public async Task<Post> CreatePost(CreatePostDto dto, Guid userId)
     {
@@ -29,8 +34,8 @@ public class PostService(PostRepository postRepository)
         if (string.IsNullOrWhiteSpace(dto.Text))
             throw new ArgumentException("El comentario no puede estar vacío.");
 
-        var postExists = await _postRepository.PostExists(postId);
-        if (!postExists) return null;
+        var post = await _postRepository.GetPostById(postId);
+        if (post == null) return null;
 
         var comment = new Comment
         {
@@ -41,6 +46,24 @@ public class PostService(PostRepository postRepository)
         };
 
         await _postRepository.AddComment(comment);
+
+        if (post.UserId != userId)
+        {
+            var commenter = await _userRepository.GetUserById(userId);
+            var who = commenter != null
+                ? $"{commenter.Name} {commenter.Surname}".Trim()
+                : "Someone";
+            _ = _notificationService.SendToUser(
+                post.UserId,
+                "New comment",
+                "$who commented on your post.".Replace("$who", who),
+                new Dictionary<string, string>
+                {
+                    ["type"] = "post_comment",
+                    ["postId"] = postId.ToString()
+                });
+        }
+
         return comment;
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using wisheo_backend_v2.DTOs;
+using wisheo_backend_v2.Repositories;
 using wisheo_backend_v2.Services;
 
 namespace wisheo_backend_v2.Controllers;
@@ -8,9 +9,10 @@ namespace wisheo_backend_v2.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class WishlistsController(WishlistService wishlistService) : BaseController
+public class WishlistsController(WishlistService wishlistService, UserRepository userRepository) : BaseController
 {
     private readonly WishlistService _wishlistService = wishlistService;
+    private readonly UserRepository _userRepository = userRepository;
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateWishlistDto dto)
@@ -44,6 +46,15 @@ public class WishlistsController(WishlistService wishlistService) : BaseControll
     {
         var lists = await _wishlistService.GetUserWishlists(UserId);
         return Ok(lists);
+    }
+
+    [HttpPost("{id}/share")]
+    public async Task<IActionResult> Share(Guid id)
+    {
+        var slug = await _wishlistService.EnsureShareSlug(id, UserId);
+        if (slug == null) return NotFound("Lista no encontrada o no tienes permiso");
+
+        return Ok(new { slug });
     }
 
     [HttpPost("{wishlistId}/items")]
@@ -82,5 +93,31 @@ public class WishlistsController(WishlistService wishlistService) : BaseControll
         if (!success) return NotFound("Ítem no encontrado o no tienes permisos para editarlo");
 
         return Ok(new { message = "Ítem actualizado correctamente" });
+    }
+
+    // ── Collaborators ──────────────────────────────────────────────────────────
+
+    [HttpGet("{id}/collaborators")]
+    public async Task<IActionResult> GetCollaborators(Guid id)
+    {
+        var list = await _wishlistService.GetCollaborators(id, UserId);
+        if (list == null) return NotFound("Lista no encontrada o sin acceso");
+        return Ok(list);
+    }
+
+    [HttpPost("{id}/collaborators")]
+    public async Task<IActionResult> AddCollaborator(Guid id, [FromBody] AddCollaboratorDto dto)
+    {
+        var (ok, error) = await _wishlistService.AddCollaborator(id, UserId, dto, _userRepository);
+        if (!ok) return BadRequest(new { message = error });
+        return Ok(new { message = "Colaborador añadido" });
+    }
+
+    [HttpDelete("{id}/collaborators/{userId}")]
+    public async Task<IActionResult> RemoveCollaborator(Guid id, Guid userId)
+    {
+        var ok = await _wishlistService.RemoveCollaborator(id, UserId, userId);
+        if (!ok) return NotFound("Colaborador no encontrado o no tienes permisos");
+        return Ok(new { message = "Colaborador eliminado" });
     }
 }

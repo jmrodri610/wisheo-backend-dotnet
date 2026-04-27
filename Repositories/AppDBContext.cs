@@ -13,6 +13,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Follow> Follows { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<Comment> Comments { get; set; }
+    public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<WishlistCollaborator> WishlistCollaborators { get; set; }
+    public DbSet<DeviceToken> DeviceTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -60,6 +63,52 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .WithMany()
             .HasForeignKey(c => c.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Wishlist>()
+            .HasIndex(w => w.PublicSlug)
+            .IsUnique();
+
+        modelBuilder.Entity<Reservation>()
+            .HasOne(r => r.WishItem)
+            .WithMany(i => i.Reservations)
+            .HasForeignKey(r => r.WishItemId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Reservation>()
+            .HasOne(r => r.User)
+            .WithMany()
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Reservation>()
+            .HasIndex(r => r.CancelToken)
+            .IsUnique();
+
+        modelBuilder.Entity<WishlistCollaborator>()
+            .HasOne(c => c.Wishlist)
+            .WithMany(w => w.Collaborators)
+            .HasForeignKey(c => c.WishlistId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WishlistCollaborator>()
+            .HasOne(c => c.User)
+            .WithMany()
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WishlistCollaborator>()
+            .HasIndex(c => new { c.WishlistId, c.UserId })
+            .IsUnique();
+
+        modelBuilder.Entity<DeviceToken>()
+            .HasOne(d => d.User)
+            .WithMany()
+            .HasForeignKey(d => d.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<DeviceToken>()
+            .HasIndex(d => d.Token)
+            .IsUnique();
     }
 }
 

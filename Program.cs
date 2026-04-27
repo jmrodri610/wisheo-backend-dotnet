@@ -53,6 +53,8 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JwtHelper>();
 builder.Services.AddScoped<WishlistRepository>();
 builder.Services.AddScoped<WishlistService>();
+builder.Services.AddScoped<DeviceTokenRepository>();
+builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<FeedRepository>();
 builder.Services.AddScoped<FeedService>();
 builder.Services.AddScoped<SocialRepository>();

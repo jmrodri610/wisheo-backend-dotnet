@@ -42,6 +42,13 @@ namespace wisheo_backend_v2.Repositories
         {
             return await _context.Posts.AnyAsync(p => p.Id == postId);
         }
+
+        public async Task<Post?> GetPostById(Guid postId)
+        {
+            return await _context.Posts
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+        }
     }
 
     

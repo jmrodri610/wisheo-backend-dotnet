@@ -13,8 +13,11 @@ public class Wishlist
     [MaxLength(10)]
     public string? Emoji { get; set; }
     public bool IsPublic { get; set; } = true;
+    [MaxLength(64)]
+    public string? PublicSlug { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Guid UserId { get; set; }
     public User User { get; set; } = null!;
     public ICollection<WishItem> Items { get; set; } = [];
+    public ICollection<WishlistCollaborator> Collaborators { get; set; } = [];
 }

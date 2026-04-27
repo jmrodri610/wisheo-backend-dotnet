@@ -20,4 +20,5 @@ public class WishItem
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Guid WishlistId { get; set; }
     public Wishlist Wishlist { get; set; } = null!;
+    public ICollection<Reservation> Reservations { get; set; } = [];
 }

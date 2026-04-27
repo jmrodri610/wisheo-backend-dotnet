@@ -2,13 +2,15 @@ namespace wisheo_backend_v2.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using wisheo_backend_v2.Services;
 using wisheo_backend_v2.DTOs;
+using wisheo_backend_v2.Repositories;
 using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController(UserService userService) : BaseController
+public class UsersController(UserService userService, DeviceTokenRepository deviceTokenRepository) : BaseController
 {
     private readonly UserService _userService = userService;
+    private readonly DeviceTokenRepository _deviceTokenRepository = deviceTokenRepository;
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(UserRegisterDto dto)
@@ -72,5 +74,16 @@ public class UsersController(UserService userService) : BaseController
         }
 
         return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPost("me/device-token")]
+    public async Task<IActionResult> RegisterDeviceToken([FromBody] RegisterDeviceTokenDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Token))
+            return BadRequest(new { message = "Token vacío." });
+
+        await _deviceTokenRepository.Upsert(UserId, dto.Token, dto.Platform);
+        return Ok(new { message = "Device token registrado." });
     }
 }
